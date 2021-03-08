@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../configs/size_config.dart';
+
 class Body extends StatefulWidget {
   @override
   _BodyState createState() => _BodyState();
@@ -28,6 +30,6 @@ class _BodyState extends State<Body>{
           child: SizedBox(),
         )
       ],
-    )
+    );
   }
 }
