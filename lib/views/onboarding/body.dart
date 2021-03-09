@@ -1,83 +1,41 @@
-import 'package:flutter/material.dart';
+import 'package:biz_directory/app/connectivity.dart';
 import 'package:connectivity/connectivity.dart';
-import 'package:flutter/services.dart';
-import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 
 
 
 class Body extends StatefulWidget {
+  final NetworkProvider networkProvider;
 
+  Body({@required this.networkProvider});
 
   @override
   _BodyState createState() => _BodyState();
 }
 
 class _BodyState extends State<Body> {
-  String _connectionStatus = 'offline';
-  final Connectivity _connectivity = Connectivity();
-   StreamSubscription<ConnectivityResult> _connectivitySubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    initConnectivity();
-    _connectivitySubscription =
-        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-  }
 
   @override
   void dispose() {
-    _connectivitySubscription.cancel();
+    widget.networkProvider.disposeStreams();
     super.dispose();
   }
 
-  Future<void> initConnectivity() async {
-    ConnectivityResult result = ConnectivityResult.none;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      result = await _connectivity.checkConnectivity();
-    } on PlatformException catch (e) {
-      print(e.toString());
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) {
-      return Future.value(null);
-    }
-
-    return _updateConnectionStatus(result);
-  }
-
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-
-        body: Center(
-          child: Text('$_connectionStatus'),
-        )
-
+    return StreamProvider<ConnectivityResult>.value(value: widget.networkProvider.networkStatusController.stream,
+      child: Consumer<ConnectivityResult>(
+        builder: (context, value, _){
+          if (value==null){
+            return Container();
+          }
+          return Text("Body");
+        },
+      ),
     );
   }
 
 
-  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
-    switch (result) {
-      case ConnectivityResult.wifi:
-        setState(() => _connectionStatus = 'you are online');
-        break;
-      case ConnectivityResult.mobile:
-      setState(() => _connectionStatus = 'you are online');
-      break;
-      case ConnectivityResult.none:
-        setState(() => _connectionStatus = 'you are offline!! check your network connection');
-        break;
-      default:
-        setState(() => _connectionStatus = 'Failed to get connectivity.');
-        break;
-    }
-  }
 }
